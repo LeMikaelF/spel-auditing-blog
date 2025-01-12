@@ -7,16 +7,20 @@ import java.util.List;
 
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-@SpringBootTest(classes = { AuditAspect.class, AuditConfig.class, AuditAspectTest.TestAuditable.class })
+@ExtendWith(SpringExtension.class)
+@Import({ AuditAspect.class, AuditConfig.class, AuditAspectTest.TestAuditable.class })
 class AuditAspectTest implements WithAssertions {
 
     private static final String USER_ID = "userId";
 
     @Autowired
+    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     private TestAuditable auditable;
 
     @MockitoBean
