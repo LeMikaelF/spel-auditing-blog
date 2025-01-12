@@ -1,6 +1,7 @@
 package com.mikaelfrancoeur.spelblog1.audit;
 
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.util.List;
 
@@ -10,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-@SpringBootTest(classes = { AuditAspect.class, AuditConfig.class, AuditTest.TestAuditable.class })
-class AuditTest implements WithAssertions {
+@SpringBootTest(classes = { AuditAspect.class, AuditConfig.class, AuditAspectTest.TestAuditable.class })
+class AuditAspectTest implements WithAssertions {
 
     private static final String USER_ID = "userId";
 
@@ -55,6 +56,14 @@ class AuditTest implements WithAssertions {
                 .hasMessage("@Audit expression evaluated to collection with non-string element: java.lang.Integer");
     }
 
+    @Test
+    void itDoesNotAuditWhenTheAdvisedMethodsThrowsAnException() {
+        assertThatThrownBy(auditable::throwException)
+                .hasMessage("test exception");
+
+        verifyNoInteractions(auditService);
+    }
+
     static class TestAuditable {
         @Audit(action = AuditAction.DISABLE_USER, expression = "123")
         void withExceptionEvaluatingToNumber() {
@@ -65,12 +74,16 @@ class AuditTest implements WithAssertions {
         }
 
         @Audit(action = AuditAction.DISABLE_USER, expression = "#models.![userProfileId]")
-        public void disableUsers(List<UserDisableModel> models) {
+        void disableUsers(List<UserDisableModel> models) {
         }
 
-        @SuppressWarnings("unused")
         @Audit(action = AuditAction.CREATE_USER, expression = "#userId")
-        public void createUser(String userId) {
+        void createUser(@SuppressWarnings({ "unused", "SameParameterValue" }) String userId) {
+        }
+
+        @Audit(action = AuditAction.CREATE_USER, expression = "'abc'")
+        void throwException() {
+            throw new RuntimeException("test exception");
         }
     }
 }

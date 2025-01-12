@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Objects;
 
 import org.aspectj.lang.JoinPoint;
-import org.aspectj.lang.annotation.After;
+import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.expression.MethodBasedEvaluationContext;
@@ -24,7 +24,7 @@ public class AuditAspect {
     private final SpelExpressionParser parser = new SpelExpressionParser();
     private final AuditService auditService;
 
-    @After("@annotation(auditAnnotation)")
+    @AfterReturning("@annotation(auditAnnotation)")
     void audit(JoinPoint joinPoint, Audit auditAnnotation) {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 
