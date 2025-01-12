@@ -91,7 +91,7 @@ class AuditAspectTest implements WithAssertions {
         }
 
         @Audit(action = AuditAction.DISABLE_USER, expression = "#models.![userProfileId]")
-        void disableUsers(List<UserDisableModel> models) {
+        void disableUsers(@SuppressWarnings("unused") List<UserDisableModel> models) {
         }
 
         @Audit(action = AuditAction.CREATE_USER, expression = "#userId")
