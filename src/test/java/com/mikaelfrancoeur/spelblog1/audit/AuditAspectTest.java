@@ -8,10 +8,13 @@ import java.util.List;
 import org.assertj.core.api.WithAssertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mockito.InOrder;
+import org.mockito.Mockito;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.util.AopTestUtils;
 
 @ExtendWith(SpringExtension.class)
 @Import({ AuditAspect.class, AuditConfig.class, AuditAspectTest.TestAuditable.class })
@@ -19,8 +22,7 @@ class AuditAspectTest implements WithAssertions {
 
     private static final String USER_ID = "userId";
 
-    @Autowired
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
+    @MockitoSpyBean
     private TestAuditable auditable;
 
     @MockitoBean
@@ -58,6 +60,17 @@ class AuditAspectTest implements WithAssertions {
     void itThrowsAnExceptionWhenTheExpressionEvaluatesToACollectionContainingNonStringElements() {
         assertThatThrownBy(() -> auditable.withExceptionEvaluatingToCollectionWithNonStringElements())
                 .hasMessage("@Audit expression evaluated to collection with non-string element: java.lang.Integer");
+    }
+
+    @Test
+    void itAuditsAfterTheAdvisedMethod() {
+        auditable.createUser(USER_ID);
+
+        TestAuditable targetObject = AopTestUtils.getUltimateTargetObject(auditable);
+        InOrder inOrder = Mockito.inOrder(targetObject, auditService);
+
+        inOrder.verify(targetObject).createUser(USER_ID);
+        inOrder.verify(auditService).audit(AuditAction.CREATE_USER, USER_ID);
     }
 
     @Test
