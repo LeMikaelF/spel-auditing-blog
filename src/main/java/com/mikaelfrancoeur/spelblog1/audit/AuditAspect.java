@@ -29,8 +29,9 @@ public class AuditAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 
         Expression expression = parser.parseExpression(auditAnnotation.expression());
+        @SuppressWarnings("DataFlowIssue") // first parameter is not annotated @Nullable, but it really is
         EvaluationContext context = new MethodBasedEvaluationContext(
-                new Object(),
+                null,
                 signature.getMethod(),
                 joinPoint.getArgs(),
                 new DefaultParameterNameDiscoverer());
