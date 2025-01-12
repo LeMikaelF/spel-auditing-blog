@@ -29,20 +29,17 @@ public class AuditAspect {
         MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 
         Expression expression = parser.parseExpression(auditAnnotation.expression());
-        evaluateExpression(joinPoint, signature, expression);
-
-        Collection<String> auditableIds = evaluateExpression(joinPoint, signature, expression);
-        auditableIds.forEach(id -> auditService.audit(auditAnnotation.action(), id));
-    }
-
-    private Collection<String> evaluateExpression(JoinPoint joinPoint, MethodSignature signature, Expression expression) {
         EvaluationContext context = new MethodBasedEvaluationContext(
                 new Object(),
                 signature.getMethod(),
                 joinPoint.getArgs(),
                 new DefaultParameterNameDiscoverer());
 
-        Object result = expression.getValue(context);
+        Collection<String> auditableIds = asStringCollection(expression.getValue(context));
+        auditableIds.forEach(id -> auditService.audit(auditAnnotation.action(), id));
+    }
+
+    private Collection<String> asStringCollection(Object result) {
         Objects.requireNonNull(result, "expression of @Audit evaluated to null");
 
         return switch (result) {
@@ -53,7 +50,8 @@ public class AuditAspect {
                 //noinspection unchecked
                 yield (Collection<String>) collection;
             }
-            default -> throw new RuntimeException("@Audit expression evaluated to non-string type %s".formatted(result.getClass().getName()));
+            default ->
+                    throw new RuntimeException("@Audit expression evaluated to non-string type %s".formatted(result.getClass().getName()));
         };
     }
 }
