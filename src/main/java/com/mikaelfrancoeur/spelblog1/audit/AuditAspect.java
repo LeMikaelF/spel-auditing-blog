@@ -13,11 +13,13 @@ import org.springframework.core.DefaultParameterNameDiscoverer;
 import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import lombok.RequiredArgsConstructor;
 
 @Aspect
+@Component
 @RequiredArgsConstructor
 public class AuditAspect {
 
