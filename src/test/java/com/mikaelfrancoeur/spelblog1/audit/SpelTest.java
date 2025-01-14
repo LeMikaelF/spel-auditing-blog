@@ -38,8 +38,7 @@ public class SpelTest implements WithAssertions {
 
         MethodBasedEvaluationContext context = new MethodBasedEvaluationContext(
                 new Object(),
-                this.getClass()
-                        .getDeclaredMethod("doSomething", String.class),
+                getClass().getDeclaredMethod("doSomething", String.class),
                 new Object[] { "the argument" },
                 new DefaultParameterNameDiscoverer());
 
